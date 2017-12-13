@@ -10,7 +10,7 @@ public class TwitterAPIPostingActions {
 	public static void writeATextTweet(String text) throws TwitterException {
 		Twitter twitter = loginTest.twitter;
 		Status status2 = twitter.updateStatus(text);
-	    System.out.println("Successfully wrote a Tweet containing [" + status2.getText() + "].");
+		System.out.println("Successfully wrote a Tweet containing [" + status2.getText() + "].");
 	}
 	
 	public static void writeATweetContainingAPic(String text, File a) throws TwitterException {
