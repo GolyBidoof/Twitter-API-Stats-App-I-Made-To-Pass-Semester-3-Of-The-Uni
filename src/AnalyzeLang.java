@@ -12,14 +12,18 @@ import twitter4j.Status;
 import twitter4j.TwitterException;
 
 public class AnalyzeLang {
-
+	
+	static List<Status> statuses;
+	static String nickOfAPerson = "NitroKoopa";
+	
+	public static void handleStatuses(int number) throws TwitterException {
+		Paging p = new Paging();
+        p.setCount(number);
+        statuses = loginTest.twitter.getUserTimeline(nickOfAPerson, p);
+	}
 	
     public static void analyzeLang() throws TwitterException, FontFormatException, IOException {
-    	Paging p = new Paging();
-        p.setCount(100);
-        List<Status> statuses = loginTest.twitter.getUserTimeline("FyneQ", p);
-        List<String> vec1 = new ArrayList<String>();
-        
+    	List<String> vec1 = new ArrayList<String>();
 	    for (Status status : statuses) {
 	    	String ISOCode = status.getLang();
 	    	vec1.add(ISOCode);
@@ -37,10 +41,8 @@ public class AnalyzeLang {
 	    ISONames.Load();
 	    Map<String, Long> gudLangMap = ISONames.changeNamesToISO(sortedMap);
 	    
-	    JFreeChartBarColors.color(gudLangMap);	
+	    JFreeChartBarColors.languageUses(gudLangMap);	
 	    System.out.println("Sorted Map: " + Arrays.toString(sortedMap.entrySet().toArray()));
 	    System.out.println("Sorted Map: " + Arrays.toString(gudLangMap.entrySet().toArray()));
-	    /*for(Map.Entry<String, Record> entry: map.entrySet()) {
-    	System.out.println(entry.getKey() + " : " + entry.getValue());*/
     }
 }

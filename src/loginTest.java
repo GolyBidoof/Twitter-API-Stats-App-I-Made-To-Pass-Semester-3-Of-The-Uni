@@ -3,6 +3,7 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,10 +13,13 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 
 public final class loginTest {
-	static Twitter twitter = TwitterFactory.getSingleton();
+	static Twitter twitter;
+	
 	public static void main(String[] args) throws Exception {
 		//Message Contents
-		twitter.setOAuthConsumer(keys.keyPublic, keys.keySecret);
+		ConfigurationBuilder needThisForLongerTweets = new ConfigurationBuilder().setTweetModeExtended(true)
+				.setOAuthConsumerKey(keys.keyPublic)
+				.setOAuthConsumerSecret(keys.keySecret);
 
 		//Check if the token file exists
 		File file = new File("token");
@@ -31,13 +35,17 @@ public final class loginTest {
 			if ((text = reader.readLine()) != null) tokenSecret = text;
 			if (token != null && tokenSecret != null) {
 				accessToken = new AccessToken(token, tokenSecret);
-				twitter.setOAuthAccessToken(accessToken);
+				needThisForLongerTweets.setOAuthAccessToken(token);
+				needThisForLongerTweets.setOAuthAccessTokenSecret(tokenSecret);
+				//twitter.setOAuthAccessToken(accessToken);
 			} else {
 				System.out.println("Invalid token!");
 				System.exit(0);
 			}
 			reader.close();
 		} else {
+			twitter = TwitterFactory.getSingleton();
+			twitter.setOAuthConsumer(keys.keyPublic, keys.keySecret);
 			//Request to obtain the token
 			RequestToken requestToken = twitter.getOAuthRequestToken();
 			BufferedReader br = new BufferedReader(new InputStreamReader(System. in ));
@@ -52,6 +60,8 @@ public final class loginTest {
 					} else {
 						accessToken = twitter.getOAuthAccessToken();
 					}
+					needThisForLongerTweets.setOAuthAccessToken(accessToken.getToken());
+					needThisForLongerTweets.setOAuthAccessTokenSecret(accessToken.getTokenSecret());
 					BufferedWriter writer = new BufferedWriter(new FileWriter("token"));
 					writer.write(accessToken.getToken());
 					writer.newLine();
@@ -66,7 +76,11 @@ public final class loginTest {
 				}
 			}
 		}
+		TwitterFactory tf = new TwitterFactory(needThisForLongerTweets.build());
+		twitter = tf.getInstance();
+		AnalyzeLang.handleStatuses(100);
 		AnalyzeLang.analyzeLang();
+		HandleTweetStats.calcStats();
 		System.exit(0);
 	}
 }
