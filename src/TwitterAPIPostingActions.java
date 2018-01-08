@@ -6,18 +6,18 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 public class TwitterAPIPostingActions {
-	
+
 	public static void writeATextTweet(String text) throws TwitterException {
 		Twitter twitter = InitializeTwitterInstance.twitter;
 		Status status2 = twitter.updateStatus(text);
 		System.out.println("Successfully wrote a Tweet containing [" + status2.getText() + "].");
 	}
-	
+
 	public static void writeATweetContainingAPic(String text, File a) throws TwitterException {
 		StatusUpdate status = new StatusUpdate(text);
 		status.setMedia(a);
 		Status status2 = InitializeTwitterInstance.twitter.updateStatus(status);
-		System.out.println("Successfully wrote a Tweet with a picture: [" + status2.getText() + "] and a media file " + a.getName() + ".");
+		System.out.println("Successfully wrote a Tweet with a picture: [" + status2.getText() + "] and a media file "
+				+ a.getName() + ".");
 	}
 }
-	

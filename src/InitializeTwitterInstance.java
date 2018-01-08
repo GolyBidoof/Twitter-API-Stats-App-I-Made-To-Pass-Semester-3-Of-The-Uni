@@ -13,32 +13,33 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 
 public class InitializeTwitterInstance {
-	
+
 	static Twitter twitter;
 
 	public static void checkLogin() throws Exception {
-		//Message Contents
+		// Message Contents
 		ConfigurationBuilder needThisForLongerTweets = new ConfigurationBuilder().setTweetModeExtended(true)
-				.setOAuthConsumerKey(keys.keyPublic)
-				.setOAuthConsumerSecret(keys.keySecret);
+				.setOAuthConsumerKey(keys.keyPublic).setOAuthConsumerSecret(keys.keySecret);
 
-		//Check if the token file exists
+		// Check if the token file exists
 		File file = new File("token");
-		AccessToken accessToken = null;	
+		AccessToken accessToken = null;
 
 		if (file.exists()) {
-			//Basically set up the file to the old data
+			// Basically set up the file to the old data
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String text = null;
 			String token = null;
 			String tokenSecret = null;
-			if ((text = reader.readLine()) != null) token = text;
-			if ((text = reader.readLine()) != null) tokenSecret = text;
+			if ((text = reader.readLine()) != null)
+				token = text;
+			if ((text = reader.readLine()) != null)
+				tokenSecret = text;
 			if (token != null && tokenSecret != null) {
 				accessToken = new AccessToken(token, tokenSecret);
 				needThisForLongerTweets.setOAuthAccessToken(token);
 				needThisForLongerTweets.setOAuthAccessTokenSecret(tokenSecret);
-				//twitter.setOAuthAccessToken(accessToken);
+				// twitter.setOAuthAccessToken(accessToken);
 			} else {
 				System.out.println("Invalid token!");
 				System.exit(0);
@@ -47,9 +48,9 @@ public class InitializeTwitterInstance {
 		} else {
 			twitter = TwitterFactory.getSingleton();
 			twitter.setOAuthConsumer(keys.keyPublic, keys.keySecret);
-			//Request to obtain the token
+			// Request to obtain the token
 			RequestToken requestToken = twitter.getOAuthRequestToken();
-			BufferedReader br = new BufferedReader(new InputStreamReader(System. in ));
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			while (null == accessToken) {
 				System.out.println("Copy this link to your browser to get a token");
 				System.out.println(requestToken.getAuthorizationURL());
@@ -68,7 +69,7 @@ public class InitializeTwitterInstance {
 					writer.newLine();
 					writer.append(accessToken.getTokenSecret());
 					writer.close();
-				} catch(TwitterException te) {
+				} catch (TwitterException te) {
 					if (401 == te.getStatusCode()) {
 						System.out.println("Unable to get the access token.");
 					} else {
