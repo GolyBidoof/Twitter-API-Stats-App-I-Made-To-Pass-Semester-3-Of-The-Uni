@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -14,8 +13,15 @@ import twitter4j.Status;
 import twitter4j.TwitterException;
 
 public class HandleTweetStats {
+	
 	 public static void calcStats() throws TwitterException, FontFormatException, IOException {
-		 //Tweet Lengths
+		 
+		 /*
+		  * 
+		  * This file is heavily WIP ATM
+		  *
+		  */
+		 
 		 List<Integer> lengthsOfTweets = new ArrayList<Integer>();
 		 //List<Integer> retweetAmounts = new ArrayList<Integer>();
 		 List<String> callPeoples = new ArrayList<String>();

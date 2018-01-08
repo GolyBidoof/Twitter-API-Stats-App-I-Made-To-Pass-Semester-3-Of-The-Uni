@@ -12,10 +12,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 
-public final class loginTest {
-	static Twitter twitter;
+public class InitializeTwitterInstance {
 	
-	public static void main(String[] args) throws Exception {
+	static Twitter twitter;
+
+	public static void checkLogin() throws Exception {
 		//Message Contents
 		ConfigurationBuilder needThisForLongerTweets = new ConfigurationBuilder().setTweetModeExtended(true)
 				.setOAuthConsumerKey(keys.keyPublic)
@@ -23,7 +24,7 @@ public final class loginTest {
 
 		//Check if the token file exists
 		File file = new File("token");
-		AccessToken accessToken = null;
+		AccessToken accessToken = null;	
 
 		if (file.exists()) {
 			//Basically set up the file to the old data
@@ -78,9 +79,5 @@ public final class loginTest {
 		}
 		TwitterFactory tf = new TwitterFactory(needThisForLongerTweets.build());
 		twitter = tf.getInstance();
-		AnalyzeLang.handleStatuses(100);
-		AnalyzeLang.analyzeLang();
-		HandleTweetStats.calcStats();
-		System.exit(0);
 	}
 }
