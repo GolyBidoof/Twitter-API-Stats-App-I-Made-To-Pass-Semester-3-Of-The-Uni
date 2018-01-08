@@ -19,7 +19,7 @@ public class ISONames {
 	static Vector<ISOLangPair> AllTheLangs = new Vector<ISOLangPair>();
 	
 	public static void Load() throws IOException {
-		 File fr = new File("src/data_csv.csv");
+		 File fr = new File("src/RelevantFiles/data_csv.csv");
 	     Scanner inputStream = new Scanner(fr);
 	     while(inputStream.hasNextLine())
 	     {

@@ -27,8 +27,8 @@ import twitter4j.TwitterException;
 import org.jfree.chart.ChartUtils;
 public class JFreeChartBarColors {
 
-	static File fontRegular = new File("src/Ubuntu.ttf");
-	static File fontBold = new File("src/Ubuntu-Bold.ttf");
+	static File fontRegular = new File("src/RelevantFiles/Ubuntu.ttf");
+	static File fontBold = new File("src/RelevantFiles/Ubuntu-Bold.ttf");
 	static Font ubuntuFont;
 	static Font ubuntuFontBold;
 	static int chartNumber = 0;
