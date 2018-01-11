@@ -1,3 +1,4 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -5,24 +6,33 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.title.LegendTitle;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import twitter4j.TwitterException;
 
@@ -77,12 +87,13 @@ public class ChartGeneration {
 
 		BarRenderer renderer = (BarRenderer) plot.getRenderer();
 		renderer.setBarPainter(new StandardBarPainter());
-		ubuntuFont = ubuntuFont.deriveFont(20f);
+		ubuntuFont = ubuntuFont.deriveFont(16f);
 
 		ValueAxis axis = plot.getRangeAxis();
 		axis.setTickLabelFont(ubuntuFont);
 		CategoryAxis axis2 = plot.getDomainAxis();
 		axis2.setTickLabelFont(ubuntuFont);
+		axis2.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
 
 		ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
 		plot.getDomainAxis().setLabelFont(ubuntuFontBold);
@@ -296,6 +307,72 @@ public class ChartGeneration {
 		} catch (TwitterException e1) {
 		}
 
+	}
+
+	//Tweet #5
+	public static void datesLineChart(Map<String, Long> datesWeeksOccurences) throws IOException {
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		//Find lowest
+		int lowest = 999999;
+		Integer highest = Integer.parseInt(HandleTweetStats.currentWeek);
+		for (Map.Entry<String, Long> entry : datesWeeksOccurences.entrySet()) {
+			if (Integer.parseInt(entry.getKey())<lowest) lowest = Integer.parseInt(entry.getKey());
+		}
+		Integer id = lowest%100;
+		Integer year = lowest/100;
+		while(true) {
+			String type = year.toString() + (id > 9 ? id.toString() : "0" + id.toString());
+			dataset.addValue(0.0, "Amount of Tweets posted", type);
+			id++;
+			if (id>53) {
+				id=1;
+				year++;
+			}
+			if (type.equals(highest.toString())) break;
+		}
+		for (Map.Entry<String, Long> entry : datesWeeksOccurences.entrySet()) {
+			String key = entry.getKey();
+			Long val = entry.getValue();
+			dataset.setValue(val, "Amount of Tweets posted", key);
+		}
+		
+		 final JFreeChart lineChart = ChartFactory.createLineChart(
+		            "Tweets posted by weeks",  // chart title
+		            "Weeks and years",         // domain axis label
+		            "Posted tweets",           // range axis label
+		            dataset,                   // data
+		            PlotOrientation.VERTICAL,  // orientation
+		            true,                      // include legend
+		            true,                      // tooltips
+		            false                      // urls
+		        );
+		 //XYPlot plot = lineChart.getXYPlot();
+		 
+		 ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
+		 ubuntuFont = ubuntuFont.deriveFont(22f);
+		 final CategoryPlot plot = lineChart.getCategoryPlot();
+		 plot.getRenderer().setSeriesStroke(0, new BasicStroke(5));
+		 
+			ubuntuFont = ubuntuFont.deriveFont(16f);
+			ValueAxis axis = plot.getRangeAxis();
+			axis.setTickLabelFont(ubuntuFont);
+			CategoryAxis axis2 = plot.getDomainAxis();
+			axis2.setTickLabelFont(ubuntuFont);
+			axis2.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+			//axis2.setVisible(false);
+
+			LegendTitle legend = lineChart.getLegend();
+			ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
+			plot.getDomainAxis().setLabelFont(ubuntuFontBold);
+			plot.getRangeAxis().setLabelFont(ubuntuFontBold);
+			lineChart.getTitle().setFont(ubuntuFontBold);
+			ubuntuFont = ubuntuFont.deriveFont(16f);
+			legend.setItemFont(ubuntuFont);
+			
+			try {
+				saveAndPost(lineChart, "ohgodohgod");
+			} catch (TwitterException e1) {
+			}
 	}
 
 }
