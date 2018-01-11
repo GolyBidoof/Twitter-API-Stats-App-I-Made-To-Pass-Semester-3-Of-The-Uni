@@ -14,12 +14,14 @@ import twitter4j.TwitterException;
 public class AnalyzeLang {
 
 	static List<Status> statuses;
-	static String nickOfAPerson = "FyneQ";
+	static List<Status> likes;
+	static String nickOfAPerson = "szymbar15";
 
 	public static void handleStatuses(int number) throws TwitterException {
 		Paging p = new Paging();
 		p.setCount(number);
 		statuses = InitializeTwitterInstance.twitter.getUserTimeline(nickOfAPerson, p);
+		//likes = InitializeTwitterInstance.twitter.getFavorites(nickOfAPerson, p);
 	}
 
 	public static void analyzeLang() throws TwitterException, FontFormatException, IOException {

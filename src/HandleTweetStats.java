@@ -1,7 +1,12 @@
 import java.awt.FontFormatException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +20,8 @@ import twitter4j.TwitterException;
 
 public class HandleTweetStats {
 
+	static String currentWeek = null;
+	
 	public static void calcStats() throws TwitterException, FontFormatException, IOException {
 
 		/*
@@ -26,6 +33,8 @@ public class HandleTweetStats {
 		List<Integer> lengthsOfTweets = new ArrayList<Integer>();
 		List<String> callPeoples = new ArrayList<String>();
 		List<Integer[]> typesOfSignsInTweetsList = new ArrayList<Integer[]>();
+		List<String> datesWeeks = new ArrayList<String>();
+		//List<String> nicksOfPeopleWhoYouLiked = new ArrayList<String>();
 
 		for (Status status : AnalyzeLang.statuses) {
 			int length = status.getText().length();
@@ -64,8 +73,25 @@ public class HandleTweetStats {
 			}
 			typesOfSignsInTweetsList.add(typesOfSignsInTweets);
 			System.out.println(Arrays.toString(typesOfSignsInTweets));
+			
+			//Get createdAtDates
+			Date createdAtDate = status.getCreatedAt();
+			
+			//DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+			DateFormat week = new SimpleDateFormat("yyyyww");
+			//String reportDate = df.format(createdAtDate);
+			String reportWeek = week.format(createdAtDate);
 
+			//String[] reportDateWeek = {reportDate, reportWeek};
+			datesWeeks.add(reportWeek);
 		}
+		Date now = new Date(); 
+		DateFormat nowWeek = new SimpleDateFormat("yyyyww");
+		currentWeek = nowWeek.format(now);
+		
+		//for (Status status : AnalyzeLang.likes) {
+			
+		//}
 
 		Integer totalTypesOfSignsInATweet[] = { 0, 0, 0, 0, 0 };
 		for (Integer[] entries : typesOfSignsInTweetsList) {
@@ -88,7 +114,10 @@ public class HandleTweetStats {
 		Map<String, Integer> instancesOfNicksSorted = instancesOfNicks.entrySet().stream()
 				.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
-
+		Map<String, Long> datesWeeksOccurences =
+			    datesWeeks.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+				
+		
 		System.out.println(instancesOfNicksSorted.size() + " people tweeted at:");
 		System.out.println(instancesOfNicksSorted);
 		// TwitterAPIPostingActions.writeATextTweet("In the person's last 100 Tweets, "
@@ -96,5 +125,6 @@ public class HandleTweetStats {
 		// characters a Tweet");
 		ChartGeneration.charactersInTweets(totalTypesOfSignsInATweet, typesOfSignsInTweetsList);
 		ChartGeneration.mentionPieChart(instancesOfNicksSorted);
+		ChartGeneration.datesLineChart(datesWeeksOccurences);
 	}
 }
