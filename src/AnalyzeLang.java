@@ -1,36 +1,23 @@
 import java.awt.FontFormatException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.TwitterException;
 
 public class AnalyzeLang {
 
-	static List<Status> statuses;
-	static List<Status> likes;
-	static String nickOfAPerson = "szymbar15";
-
-	public static void handleStatuses(int number) throws TwitterException {
-		Paging p = new Paging();
-		p.setCount(number);
-		statuses = InitializeTwitterInstance.twitter.getUserTimeline(nickOfAPerson, p);
-		//likes = InitializeTwitterInstance.twitter.getFavorites(nickOfAPerson, p);
-	}
-
 	public static void analyzeLang() throws TwitterException, FontFormatException, IOException {
 		List<String> vec1 = new ArrayList<String>();
 		int size = 0;
-		for (Status status : statuses) {
+		for (Status status : ImportingTweets.statuses) {
 			String ISOCode = status.getLang();
 			vec1.add(ISOCode);
-			System.out.println(ISOCode);
+			//System.out.println(ISOCode);
 			size++;
 		}
 
@@ -43,7 +30,7 @@ public class AnalyzeLang {
 		Map<String, Long> gudLangMap = ISONames.changeNamesToISO(sortedMap);
 
 		ChartGeneration.languageUses(gudLangMap, size);
-		System.out.println("Sorted Map: " + Arrays.toString(sortedMap.entrySet().toArray()));
-		System.out.println("Sorted Map: " + Arrays.toString(gudLangMap.entrySet().toArray()));
+		//System.out.println("Sorted Map: " + Arrays.toString(sortedMap.entrySet().toArray()));
+		//System.out.println("Sorted Map: " + Arrays.toString(gudLangMap.entrySet().toArray()));
 	}
 }
