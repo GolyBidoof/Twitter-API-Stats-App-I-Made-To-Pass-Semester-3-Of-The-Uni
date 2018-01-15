@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
@@ -72,8 +74,9 @@ public class ChartGeneration {
 			size++;
 		}
 
-		JFreeChart chart = ChartFactory.createBarChart("Breakdown of the last " + totalSize + " Tweets by "
-				+ MainClass.nickOfAPerson + " by language posted", "Language", "Amount of Tweets", dataset);
+		JFreeChart chart = ChartFactory.createBarChart(
+				"Breakdown of the last " + totalSize + " Tweets by " + MainClass.nickOfAPerson + " by language posted",
+				"Language", "Amount of Tweets", dataset);
 
 		CategoryPlot plot = chart.getCategoryPlot();
 		chart.removeLegend();
@@ -137,14 +140,16 @@ public class ChartGeneration {
 				data[i][ID] = entry[i];
 			ID++;
 		}
-		for (int i = 0; i < ID; i++) {
+		int j = 0;
+		if (ID>250) j=ID-250;
+		for (int i=j; i < ID; i++) {
 			dataset.addValue(data[0][i], "Capital letters", Integer.toString(i));
 			dataset.addValue(data[1][i], "Lowercase letters", Integer.toString(i));
 			dataset.addValue(data[2][i], "Numbers", Integer.toString(i));
 			dataset.addValue(data[3][i], "Spaces", Integer.toString(i));
 			dataset.addValue(data[4][i], "Other characters", Integer.toString(i));
 		}
-		String chartName = "Amount of characters represented in " + ID + " last Tweets by " + MainClass.nickOfAPerson;
+		String chartName = "Amount of characters represented in " + Integer.min(ID, 250) + " last Tweets by " + MainClass.nickOfAPerson;
 		JFreeChart chart = ChartFactory.createStackedBarChart(chartName, "Tweet ID", "Character count", dataset);
 
 		CategoryPlot plot = chart.getCategoryPlot();
@@ -180,9 +185,9 @@ public class ChartGeneration {
 		renderer.setItemMargin(0);
 		try {
 			saveAndPost(chart,
-					MainClass.nickOfAPerson + " in his last " + ID + " Tweets wrote " + totals[0]
-							+ " capital letters, " + totals[1] + " lowercase letters, " + totals[2] + " numbers, "
-							+ totals[3] + " spaces and " + totals[4] + " other characters.");
+					MainClass.nickOfAPerson + " in his last " + ID + " Tweets wrote " + totals[0] + " capital letters, "
+							+ totals[1] + " lowercase letters, " + totals[2] + " numbers, " + totals[3] + " spaces and "
+							+ totals[4] + " other characters.");
 		} catch (TwitterException e1) {
 		}
 		charactersInTweetsBreakdown(colors, totals);
@@ -302,70 +307,90 @@ public class ChartGeneration {
 
 	}
 
-	//Tweet #5
+	// Tweet #5
 	public static void datesLineChart(Map<String, Long> datesWeeksOccurences) throws IOException {
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		//Find lowest
-		int lowest = 999999;
+		// Find lowest
+		Integer lowest = 999999;
 		Integer highest = Integer.parseInt(HandleTweetStats.currentWeek);
 		for (Map.Entry<String, Long> entry : datesWeeksOccurences.entrySet()) {
-			if (Integer.parseInt(entry.getKey())<lowest) lowest = Integer.parseInt(entry.getKey());
+			if (Integer.parseInt(entry.getKey()) < lowest)
+				lowest = Integer.parseInt(entry.getKey());
 		}
-		Integer id = lowest%100;
-		Integer year = lowest/100;
-		while(true) {
-			String type = year.toString() + (id > 9 ? id.toString() : "0" + id.toString());
-			dataset.addValue(0.0, "Amount of Tweets posted", type);
-			id++;
-			if (id>53) {
-				id=1;
-				year++;
+		Integer sum = 0, absoluteSum = 0;
+		Integer idCountingDown = highest % 100;
+		Integer yearCountingDown = highest / 100;
+		Boolean thisHappened = false;
+		String lowestValue = yearCountingDown.toString() + (idCountingDown > 9 ? idCountingDown.toString() : "0" + idCountingDown.toString());
+		List<String> weeks = new ArrayList<String>();
+		
+		for (int i=0; i<30; i++) {
+			if (thisHappened && i>4) break;
+			lowestValue = yearCountingDown.toString() + (idCountingDown > 9 ? idCountingDown.toString() : "0" + idCountingDown.toString());
+			dataset.addValue(0, "Amount of Tweets posted", lowestValue);
+			idCountingDown--;
+			if (idCountingDown < 1) {
+				idCountingDown = 53;
+				yearCountingDown--;
 			}
-			if (type.equals(highest.toString())) break;
-		}
-		for (Map.Entry<String, Long> entry : datesWeeksOccurences.entrySet()) {
-			String key = entry.getKey();
-			Long val = entry.getValue();
-			dataset.setValue(val, "Amount of Tweets posted", key);
+			weeks.add(lowestValue);
+			if(lowestValue.equals(lowest.toString())) thisHappened = true;
 		}
 		
-		 final JFreeChart lineChart = ChartFactory.createLineChart(
-		            "Tweets posted by weeks",  // chart title
-		            "Weeks and years",         // domain axis label
-		            "Posted tweets",           // range axis label
-		            dataset,                   // data
-		            PlotOrientation.VERTICAL,  // orientation
-		            true,                      // include legend
-		            true,                      // tooltips
-		            false                      // urls
-		        );
-		 //XYPlot plot = lineChart.getXYPlot();
-		 
-		 ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
-		 ubuntuFont = ubuntuFont.deriveFont(22f);
-		 final CategoryPlot plot = lineChart.getCategoryPlot();
-		 plot.getRenderer().setSeriesStroke(0, new BasicStroke(5));
-		 
-			ubuntuFont = ubuntuFont.deriveFont(16f);
-			ValueAxis axis = plot.getRangeAxis();
-			axis.setTickLabelFont(ubuntuFont);
-			CategoryAxis axis2 = plot.getDomainAxis();
-			axis2.setTickLabelFont(ubuntuFont);
-			axis2.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
-			//axis2.setVisible(false);
+		for (Map.Entry<String, Long> entry : datesWeeksOccurences.entrySet()) {
+			String key = entry.getKey(); 
+			Long val = entry.getValue();
+			absoluteSum+=val.intValue();
+			for(String s : weeks)
+			    if(s.contains(key)) {
+			    	dataset.setValue(val.intValue(), "Amount of Tweets posted", key);
+			    	sum+=val.intValue();
+			    }
+		}
 
-			LegendTitle legend = lineChart.getLegend();
-			ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
-			plot.getDomainAxis().setLabelFont(ubuntuFontBold);
-			plot.getRangeAxis().setLabelFont(ubuntuFontBold);
-			lineChart.getTitle().setFont(ubuntuFontBold);
-			ubuntuFont = ubuntuFont.deriveFont(16f);
-			legend.setItemFont(ubuntuFont);
-			
-			try {
-				saveAndPost(lineChart, "ohgodohgod");
-			} catch (TwitterException e1) {
+		final JFreeChart lineChart = ChartFactory.createLineChart(sum + " Tweets posted in last " + weeks.size() + " weeks", // chart title
+				"Weeks and years", // domain axis label
+				"Posted tweets", // range axis label
+				dataset, // data
+				PlotOrientation.VERTICAL, // orientation
+				true, // include legend
+				true, // tooltips
+				false // urls
+		);
+		// XYPlot plot = lineChart.getXYPlot();
+
+		ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
+		ubuntuFont = ubuntuFont.deriveFont(22f);
+		final CategoryPlot plot = lineChart.getCategoryPlot();
+		plot.getRenderer().setSeriesStroke(0, new BasicStroke(5));
+
+		ubuntuFont = ubuntuFont.deriveFont(16f);
+		ValueAxis axis = plot.getRangeAxis();
+		axis.setTickLabelFont(ubuntuFont);
+		CategoryAxis axis2 = plot.getDomainAxis();
+		axis2.setTickLabelFont(ubuntuFont);
+		axis2.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
+		
+		//Int values
+		NumberAxis numberAxis = (NumberAxis) plot.getRangeAxis();
+		numberAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());		
+
+		LegendTitle legend = lineChart.getLegend();
+		ubuntuFontBold = ubuntuFontBold.deriveFont(28f);
+		plot.getDomainAxis().setLabelFont(ubuntuFontBold);
+		plot.getRangeAxis().setLabelFont(ubuntuFontBold);
+		lineChart.getTitle().setFont(ubuntuFontBold);
+		ubuntuFont = ubuntuFont.deriveFont(16f);
+		legend.setItemFont(ubuntuFont);
+
+		try {
+			if (absoluteSum.equals(sum)) {
+				saveAndPost(lineChart, "All " + absoluteSum + " Tweets were posted in the last " + weeks.size() + " weeks.");
+			} else {
+				saveAndPost(lineChart, "In the last 30 weeks, " + sum + " Tweets were posted.");
 			}
+		} catch (TwitterException e1) {
+		}
 	}
 
 }
