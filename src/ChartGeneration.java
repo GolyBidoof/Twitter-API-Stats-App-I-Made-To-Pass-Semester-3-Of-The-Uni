@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -14,32 +13,26 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.CategoryLabelPositions;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.GroupedStackedBarRenderer;
-import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.title.LegendTitle;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import twitter4j.TwitterException;
 
 public class ChartGeneration {
 
-	static File fontRegular = new File("src/RelevantFiles/Ubuntu.ttf");
-	static File fontBold = new File("src/RelevantFiles/Ubuntu-Bold.ttf");
+	static File fontRegular = new File("data/RelevantFiles/Ubuntu.ttf");
+	static File fontBold = new File("data/RelevantFiles/Ubuntu-Bold.ttf");
 	static Font ubuntuFont;
 	static Font ubuntuFontBold;
 	static int chartNumber = 0;
@@ -80,7 +73,7 @@ public class ChartGeneration {
 		}
 
 		JFreeChart chart = ChartFactory.createBarChart("Breakdown of the last " + totalSize + " Tweets by "
-				+ AnalyzeLang.nickOfAPerson + " by language posted", "Language", "Amount of Tweets", dataset);
+				+ MainClass.nickOfAPerson + " by language posted", "Language", "Amount of Tweets", dataset);
 
 		CategoryPlot plot = chart.getCategoryPlot();
 		chart.removeLegend();
@@ -107,7 +100,7 @@ public class ChartGeneration {
 		renderer.setItemMargin(0);
 
 		try {
-			String output = "In the last " + totalSize + " Tweets by " + AnalyzeLang.nickOfAPerson
+			String output = "In the last " + totalSize + " Tweets by " + MainClass.nickOfAPerson
 					+ ", the most popular language";
 			int defaultSize = 3;
 			if (sortedMap.size() < 3)
@@ -151,7 +144,7 @@ public class ChartGeneration {
 			dataset.addValue(data[3][i], "Spaces", Integer.toString(i));
 			dataset.addValue(data[4][i], "Other characters", Integer.toString(i));
 		}
-		String chartName = "Amount of characters represented in " + ID + " last Tweets by " + AnalyzeLang.nickOfAPerson;
+		String chartName = "Amount of characters represented in " + ID + " last Tweets by " + MainClass.nickOfAPerson;
 		JFreeChart chart = ChartFactory.createStackedBarChart(chartName, "Tweet ID", "Character count", dataset);
 
 		CategoryPlot plot = chart.getCategoryPlot();
@@ -187,7 +180,7 @@ public class ChartGeneration {
 		renderer.setItemMargin(0);
 		try {
 			saveAndPost(chart,
-					AnalyzeLang.nickOfAPerson + " in his last " + ID + " Tweets wrote " + totals[0]
+					MainClass.nickOfAPerson + " in his last " + ID + " Tweets wrote " + totals[0]
 							+ " capital letters, " + totals[1] + " lowercase letters, " + totals[2] + " numbers, "
 							+ totals[3] + " spaces and " + totals[4] + " other characters.");
 		} catch (TwitterException e1) {
@@ -302,7 +295,7 @@ public class ChartGeneration {
 		legend.setFrame(BlockBorder.NONE);
 		legend.setItemFont(ubuntuFont);
 		try {
-			saveAndPost(mentions, "The most commonly mentioned people by " + AnalyzeLang.nickOfAPerson
+			saveAndPost(mentions, "The most commonly mentioned people by " + MainClass.nickOfAPerson
 					+ " are depicted in the chart below.");
 		} catch (TwitterException e1) {
 		}

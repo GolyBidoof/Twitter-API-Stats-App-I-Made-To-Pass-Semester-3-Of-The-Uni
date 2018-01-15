@@ -22,7 +22,7 @@ public class InitializeTwitterInstance {
 				.setOAuthConsumerKey(keys.keyPublic).setOAuthConsumerSecret(keys.keySecret);
 
 		// Check if the token file exists
-		File file = new File("token");
+		File file = new File("data/token");
 		AccessToken accessToken = null;
 
 		if (file.exists()) {
@@ -64,7 +64,7 @@ public class InitializeTwitterInstance {
 					}
 					needThisForLongerTweets.setOAuthAccessToken(accessToken.getToken());
 					needThisForLongerTweets.setOAuthAccessTokenSecret(accessToken.getTokenSecret());
-					BufferedWriter writer = new BufferedWriter(new FileWriter("token"));
+					BufferedWriter writer = new BufferedWriter(new FileWriter("data/token"));
 					writer.write(accessToken.getToken());
 					writer.newLine();
 					writer.append(accessToken.getTokenSecret());
