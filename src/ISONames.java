@@ -25,16 +25,11 @@ public class ISONames {
 		while (inputStream.hasNextLine()) {
 			String line = inputStream.nextLine();
 			String values[] = line.split(",");
-			//System.out.println(line);
-			/*for (int i = 0; i < values.length; i++) {
-				System.out.println(values[i]);
-			}*/
 			String code = values[1].toLowerCase();
 			String EngFullName = values[0];
 			ISOLangPair temp = new ISOLangPair(code, EngFullName);
 			AllTheLangs.addElement(temp);
 		}
-		//System.out.println(AllTheLangs.size());
 		inputStream.close();
 		System.out.println("Imported language file");
 	}

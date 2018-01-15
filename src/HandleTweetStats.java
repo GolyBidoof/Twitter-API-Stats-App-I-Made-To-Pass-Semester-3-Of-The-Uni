@@ -18,42 +18,50 @@ import twitter4j.TwitterException;
 public class HandleTweetStats {
 
 	static String currentWeek = null;
-	
-	public static void calcStats() throws TwitterException, FontFormatException, IOException, ClassNotFoundException {
 
-		/*
-		 * 
-		 * This file is heavily WIP ATM
-		 *
-		 */
+	public static void setCurrentWeek() {
+		Date now = new Date();
+		DateFormat nowWeek = new SimpleDateFormat("yyyyww");
+		currentWeek = nowWeek.format(now);
+	}
 
+	public static void performIO() throws IOException, ClassNotFoundException {
+		for (Status status : ImportingTweets.statuses) {
+			ObjectIO.saveObjectToFile(status);
+		}
+
+		System.out.println("Updated " + ImportingTweets.statuses.size() + " statuses in the database.");
+		ImportingTweets.statuses.clear();
+		ObjectIO.loadObjectFromFile();
+		System.out.println(
+				"Imported the user database successfully with " + ImportingTweets.statuses.size() + " statuses.");
+	}
+
+	public static void calcStats() throws TwitterException, FontFormatException, ClassNotFoundException, IOException {
 		List<Integer> lengthsOfTweets = new ArrayList<Integer>();
 		List<String> callPeoples = new ArrayList<String>();
 		List<Integer[]> typesOfSignsInTweetsList = new ArrayList<Integer[]>();
 		List<String> datesWeeks = new ArrayList<String>();
-		
+		Boolean verifyIfQuery = (MainClass.query != null && !MainClass.query.isEmpty());
+
+		performIO();
+
 		for (Status status : ImportingTweets.statuses) {
-			ObjectIO.saveObjectToFile(status);
-		}
-		
-		System.out.println("Updated " + ImportingTweets.statuses.size() + " statuses in the database.");
-		ImportingTweets.statuses.clear();
-		ObjectIO.loadObjectFromFile();
-		System.out.println("Imported the user database successfully with " + ImportingTweets.statuses.size() + " statuses.");
-		AnalyzeLang.analyzeLang();
-		
-		for (Status status : ImportingTweets.statuses) {
-			
+			if (verifyIfQuery) {
+				String text = status.getText();
+				if (!text.toLowerCase().contains(MainClass.query.toLowerCase())) {
+					continue;
+				}
+			}
+
 			int length = status.getText().length();
 			lengthsOfTweets.add(length);
-			//System.out.println(status.getText());
 
 			// Look for @ signs
 			Pattern pattern = Pattern.compile("@(\\S+)");
 			Matcher matcher = pattern.matcher(status.getText());
 			while (matcher.find()) {
 				callPeoples.add(matcher.group(1));
-				//System.out.println(matcher.group(1));
 			}
 
 			// Parse string byte by byte
@@ -79,26 +87,24 @@ public class HandleTweetStats {
 					typesOfSignsInTweets[4]++;
 			}
 			typesOfSignsInTweetsList.add(typesOfSignsInTweets);
-			//System.out.println(Arrays.toString(typesOfSignsInTweets));
-			
-			//Get createdAtDates
-			Date createdAtDate = status.getCreatedAt();
-			
-			//DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-			DateFormat week = new SimpleDateFormat("yyyyww");
-			//String reportDate = df.format(createdAtDate);
-			String reportWeek = week.format(createdAtDate);
 
-			//String[] reportDateWeek = {reportDate, reportWeek};
+			Date createdAtDate = status.getCreatedAt();
+			DateFormat week = new SimpleDateFormat("yyyyww");
+			String reportWeek = week.format(createdAtDate);
 			datesWeeks.add(reportWeek);
+
+			String ISOCode = status.getLang();
+			AnalyzeLang.vec1.add(ISOCode);
 		}
-		Date now = new Date(); 
-		DateFormat nowWeek = new SimpleDateFormat("yyyyww");
-		currentWeek = nowWeek.format(now);
-		
-		//for (Status status : AnalyzeLang.likes) {
-			
-		//}
+
+		if (lengthsOfTweets.isEmpty() && verifyIfQuery) {
+			System.out.println("Could not find a single Tweet containing the query!");
+			System.exit(0);
+		} else if (lengthsOfTweets.isEmpty()) {
+			System.out.println("Could not acquire any Tweets!");
+		}
+
+		setCurrentWeek();
 
 		Integer totalTypesOfSignsInATweet[] = { 0, 0, 0, 0, 0 };
 		for (Integer[] entries : typesOfSignsInTweetsList) {
@@ -106,11 +112,6 @@ public class HandleTweetStats {
 				totalTypesOfSignsInATweet[i] += entries[i];
 		}
 
-		// int totalSum = 0, average = 0;
-		// for (int i=0; i<lengthsOfTweets.size(); i++) {
-		// totalSum+=lengthsOfTweets.indexOf(i);
-		// }
-		// average = totalSum / lengthsOfTweets.size();
 		Map<String, Integer> instancesOfNicks = new HashMap<String, Integer>();
 		if (!callPeoples.isEmpty()) {
 			for (int i = 0; i < callPeoples.size(); i++) {
@@ -121,18 +122,14 @@ public class HandleTweetStats {
 		Map<String, Integer> instancesOfNicksSorted = instancesOfNicks.entrySet().stream()
 				.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
-		Map<String, Long> datesWeeksOccurences =
-			    datesWeeks.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-				
-		
-		//System.out.println(instancesOfNicksSorted.size() + " people tweeted at:");
-		//System.out.println(instancesOfNicksSorted);
-		// TwitterAPIPostingActions.writeATextTweet("In the person's last 100 Tweets, "
-		// + totalSum + " characters were written with " + average + " average
-		// characters a Tweet");
+		Map<String, Long> datesWeeksOccurences = datesWeeks.stream()
+				.collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+
+		ImportingTweets.handleUser();
+		AnalyzeLang.analyzeLang();
 		ChartGeneration.charactersInTweets(totalTypesOfSignsInATweet, typesOfSignsInTweetsList);
 		ChartGeneration.mentionPieChart(instancesOfNicksSorted);
 		ChartGeneration.datesLineChart(datesWeeksOccurences);
-		System.out.println("Finished the execution of the program");
+		System.out.println("Finished the execution of the program.");
 	}
 }
