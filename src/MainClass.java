@@ -6,6 +6,11 @@ public final class MainClass {
 		Integer amountOfTweets = 200;
 		
 		if (args.length>0) {
+			try {Integer.parseInt(args[0]);} 
+			catch(NumberFormatException e) {
+				System.out.println("Incorrect number argument!");
+				System.exit(0);
+			}
 			if (Integer.parseInt(args[0])<200 && Integer.parseInt(args[0])>0)
 				amountOfTweets = Integer.parseInt(args[0]);
 		}
@@ -19,7 +24,5 @@ public final class MainClass {
 		HandleTweetStats.calcStats();
 		System.exit(0);
 	}
-
-	
 
 }

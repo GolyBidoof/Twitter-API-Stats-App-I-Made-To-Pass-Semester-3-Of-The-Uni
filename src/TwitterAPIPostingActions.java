@@ -17,9 +17,9 @@ public class TwitterAPIPostingActions {
 		StatusUpdate status = new StatusUpdate(text);
 		status.setMedia(a);
 		Status status2 = InitializeTwitterInstance.twitter.updateStatus(status);
-		System.out.println("Wrote a Tweet with a picture: [" 
+		System.out.println("Wrote a Tweet [" 
 				+ status2.getText().substring(0,Math.min(status2.getText().length(), 50)) 
-				+ "...] and a chart "
+				+ "...] with a chart "
 				+ a.getName() 
 				+ ". URL: "
 				+ status2.getText().substring(status2.getText().lastIndexOf("https")) 

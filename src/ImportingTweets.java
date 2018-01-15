@@ -7,12 +7,17 @@ import twitter4j.TwitterException;
 public class ImportingTweets {
 
 	static List<Status> statuses;
-	static List<Status> likes;
-	public static void handleStatuses(int number) throws TwitterException {
+	
+	public static void handleStatuses(int number) {
 		Paging p = new Paging();
 		p.setCount(number);
-		statuses = InitializeTwitterInstance.twitter.getUserTimeline(MainClass.nickOfAPerson, p);
-		//likes = InitializeTwitterInstance.twitter.getFavorites(nickOfAPerson, p);
+		try {
+			statuses = InitializeTwitterInstance.twitter.getUserTimeline(MainClass.nickOfAPerson, p);
+		}
+		catch(TwitterException e) {
+			System.out.println("The following user does not exist!");
+			System.exit(0);
+		}
 	}
 
 }
